@@ -6,7 +6,7 @@ import 'types.dart';
 typedef PathFunction<T extends Params> = String Function([T? data]);
 
 /// Expose a method for transforming tokens into the path function.
-PathFunction<T> tokensToFunction<T extends Params>(
+PathFunction<Params> tokensToFunction(
   Iterable<Token> tokens, {
   bool sensitive = defatulSensitive,
   MetadataParser encode = defaultMetadataParser,
@@ -18,7 +18,7 @@ PathFunction<T> tokensToFunction<T extends Params>(
     }
   });
 
-  return ([T? data]) {
+  return ([Params? data]) {
     String path = '';
 
     for (int index = 0; index < tokens.length; index++) {

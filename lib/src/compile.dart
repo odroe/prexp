@@ -5,7 +5,7 @@ import 'tokens_to_function.dart';
 import 'types.dart';
 
 /// Compile a string to a template function for the path.
-PathFunction<T> compile<T extends Params>(
+PathFunction<Params> compile(
   String path, {
   String delimiter = defautlDelimiter,
   String prefixes = defaultPrefixes,
