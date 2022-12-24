@@ -36,5 +36,5 @@ class MetadataPrexpToken implements PrexpToken {
             'suffix': suffix,
             'pattern': pattern,
             'modifier': modifier,
-          })}';
+          })})';
 }
