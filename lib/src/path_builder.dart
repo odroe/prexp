@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import '_internal/constants.dart';
 import '_internal/utils.dart';
 import '_internal/parse.dart';
