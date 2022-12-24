@@ -1,13 +1,17 @@
 import 'package:prexp/prexp.dart';
 
 void main() {
-  const route = '/user/:name';
+  final String route = r'/users/:name';
 
-  // Create a match function from a route.
-  final fn = match(route);
+  final Prexp prexp = Prexp.fromString(route);
+  print(prexp.hasMatch('/users/odroe')); // true
 
-  // Print the result.
-  //
-  // `Match(path: /user/John, params: {name: John})`
-  print(fn('/user/John'));
+  final PathMatcher matcher = PathMatcher.fromPrexp(prexp);
+  print(matcher('/users/odroe')); // (PrexpMatch(/users/Seven, {name: Seven}))
+
+  final PathBuilder builder = PathBuilder.fromPath(route);
+  print(builder({'name': 'odroe'})); // /users/odroe
+
+  print(Prexp.parse(
+      route)); // [StringPrexpToken(/users), MetadataPrexpToken({"name":"name","prefix":"/","suffix":"","pattern":"[^\\/#\\?]+?","modifier":""}]
 }

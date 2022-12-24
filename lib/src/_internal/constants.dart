@@ -1,4 +1,4 @@
-const bool defatulSensitive = false;
+const bool defatulCaseSensitive = false;
 const bool defaultValidate = true;
 const String defautlDelimiter = '/#?';
 const String defaultPrefixes = './';

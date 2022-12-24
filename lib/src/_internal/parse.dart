@@ -1,19 +1,17 @@
 import 'constants.dart';
-import 'lex_token.dart';
-import 'lex_type.dart';
 import 'lexer.dart';
-import 'token.dart';
 import 'utils.dart';
+import '../token.dart';
 
 /// Parses a string of Dart code and returns the AST.
-List<Token> parse(
+Iterable<PrexpToken> parse(
   String input, {
   String delimiter = defautlDelimiter,
   String prefixes = defaultPrefixes,
 }) {
   final List<LexToken> lexicalTokens = lexer(input);
   final String defaultPattern = '[^${escapeRegExp(delimiter)}]+?';
-  final List<Token> tokens = <Token>[];
+  final List<PrexpToken> tokens = <PrexpToken>[];
 
   int key = 0;
   int index = 0;
@@ -65,11 +63,11 @@ List<Token> parse(
       }
 
       if (path.isNotEmpty) {
-        tokens.add(StringToken(path));
+        tokens.add(StringPrexpToken(path));
         path = '';
       }
 
-      tokens.add(MetadataToken(
+      tokens.add(MetadataPrexpToken(
         name: name ?? (key++).toString(),
         prefix: prefix,
         suffix: '',
@@ -86,7 +84,7 @@ List<Token> parse(
     }
 
     if (path.isNotEmpty) {
-      tokens.add(StringToken(path));
+      tokens.add(StringPrexpToken(path));
       path = '';
     }
 
@@ -99,7 +97,7 @@ List<Token> parse(
 
       mustConsume(LexType.close);
 
-      tokens.add(MetadataToken(
+      tokens.add(MetadataPrexpToken(
         name: name.isEmpty
             ? pattern.isNotEmpty
                 ? (key++).toString()

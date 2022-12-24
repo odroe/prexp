@@ -1,24 +1,27 @@
-abstract class Token {}
+import 'dart:convert';
+
+/// Prexp token
+abstract class PrexpToken {}
 
 /// String token.
-class StringToken implements Token {
+class StringPrexpToken implements PrexpToken {
   final String value;
 
-  StringToken(this.value);
+  StringPrexpToken(this.value);
 
   @override
-  String toString() => 'StringToken($value)';
+  String toString() => 'StringPrexpToken($value)';
 }
 
 /// Metedata token.
-class MetadataToken implements Token {
+class MetadataPrexpToken implements PrexpToken {
   final String name;
   final String prefix;
   final String suffix;
   final String pattern;
   final String modifier;
 
-  const MetadataToken({
+  const MetadataPrexpToken({
     required this.name,
     required this.prefix,
     required this.suffix,
@@ -27,6 +30,11 @@ class MetadataToken implements Token {
   });
 
   @override
-  String toString() =>
-      'MetadataToken($name, $prefix, $suffix, $pattern, $modifier)';
+  String toString() => 'MetadataPrexpToken(${json.encode({
+            'name': name,
+            'prefix': prefix,
+            'suffix': suffix,
+            'pattern': pattern,
+            'modifier': modifier,
+          })}';
 }
