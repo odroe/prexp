@@ -30,18 +30,16 @@ abstract class Prexp implements RegExp {
   /// ```
   factory Prexp.fromTokens(
     Iterable<PrexpToken> tokens, {
-    Iterable<MetadataPrexpToken>? metadata,
     bool caseSensitive = defatulCaseSensitive,
     bool strict = defaultStrict,
     bool start = defaultStart,
     bool end = defaultEnd,
     String delimiter = defautlDelimiter,
-    String? endsWith,
+    String endsWith = '',
     SegmentEncoder? encoder,
   }) =>
       _PrexpFromTokensImpl(
         tokens,
-        metadata: metadata,
         caseSensitive: caseSensitive,
         strict: strict,
         start: start,
@@ -59,9 +57,7 @@ abstract class Prexp implements RegExp {
   /// print(path.hasMatch('/users/John')); // true
   /// print(path.metadata);
   /// ```
-  factory Prexp.fromRegExp(RegExp regexp,
-          [Iterable<MetadataPrexpToken>? metadata]) =>
-      _PrexpFromRegExpImpl(regexp, metadata);
+  factory Prexp.fromRegExp(RegExp regexp) => _PrexpFromRegExpImpl(regexp);
 
   /// Create a [Prexp] from [String].
   ///
@@ -72,19 +68,17 @@ abstract class Prexp implements RegExp {
   /// ```
   factory Prexp.fromString(
     String path, {
-    Iterable<MetadataPrexpToken>? metadata,
     bool caseSensitive = defatulCaseSensitive,
     bool strict = defaultStrict,
     bool end = defaultEnd,
     bool start = defaultStart,
     String delimiter = defautlDelimiter,
     String prefixes = defaultPrefixes,
-    String? endsWith,
+    String endsWith = '',
     SegmentEncoder? encoder,
   }) =>
       _PrexpFromStringImpl(
         path,
-        metadata: metadata,
         caseSensitive: caseSensitive,
         strict: strict,
         end: end,
@@ -159,26 +153,24 @@ class _PrexpFromTokensImpl extends _PrexpImpl {
 
   factory _PrexpFromTokensImpl(
     Iterable<PrexpToken> tokens, {
-    Iterable<MetadataPrexpToken>? metadata,
     bool caseSensitive = defatulCaseSensitive,
     bool strict = defaultStrict,
     bool start = defaultStart,
     bool end = defaultEnd,
     String delimiter = defautlDelimiter,
-    String? endsWith,
+    String endsWith = '',
     SegmentEncoder? encoder,
   }) {
     encoder ??= (String segment) => segment;
-    delimiter = '[${escapeRegExp(delimiter)}]';
+    String route = start ? '^' : '';
 
-    final String resolvedEndsWith = '[${escapeRegExp(endsWith ?? '')}]|\$2';
-
-    final List<MetadataPrexpToken> metadataContainer = metadata?.toList() ?? [];
-    final StringBuffer buffer = StringBuffer(start ? '^' : '');
+    final List<MetadataPrexpToken> metadata = [];
+    final String endsWithRe = '[${escapeRegExp(endsWith)}]|\$';
+    final String delimiterRe = '[${escapeRegExp(delimiter)}]';
 
     for (final PrexpToken token in tokens) {
       if (token is StringPrexpToken) {
-        buffer.write(escapeRegExp(encoder(token.value)));
+        route += escapeRegExp(encoder(token.value));
         continue;
       }
 
@@ -186,69 +178,51 @@ class _PrexpFromTokensImpl extends _PrexpImpl {
       final String prefix = escapeRegExp(encoder(token.prefix));
       final String suffix = escapeRegExp(encoder(token.suffix));
 
-      buffer.writeAll([
-        callIf<String>(
-          token.pattern.isNotEmpty,
-          () {
-            metadataContainer.add(token);
+      if (token.pattern.isNotEmpty) {
+        metadata.add(token);
 
-            return callIf<String>(
-              prefix.isNotEmpty || suffix.isNotEmpty,
-              () => callIf<String>(
-                token.modifier == '+' || token.modifier == '*',
-                () =>
-                    '(?:$prefix((?:${token.pattern})(?:$suffix$prefix(?:${token.pattern}))*)$suffix)${token.modifier == '*' ? '?' : ''}',
-                () => '(?:$prefix(${token.pattern})$suffix)${token.modifier}',
-              ),
-              () => callIf<String>(
-                token.modifier == '+' || token.modifier == '*',
-                () => '((?:${token.pattern})${token.modifier})',
-                () => '(${token.pattern})${token.modifier}',
-              ),
-            );
-          },
-          () => '(?:$prefix$suffix)${token.modifier}',
-        ),
-        callIf<String>(
-          end,
-          () {
-            final StringBuffer segmentBuffer =
-                StringBuffer(strict ? '$delimiter?' : '');
+        if (prefix.isNotEmpty || suffix.isNotEmpty) {
+          if (token.modifier == '*' || token.modifier == '+') {
+            final String mod = token.modifier == '*' ? '?' : '';
+            route +=
+                '(?:$prefix((?:${token.pattern})(?:$suffix$prefix(?:${token.pattern}))*)$suffix)$mod';
+          } else {
+            route += '(?:$prefix(${token.pattern})$suffix)${token.modifier}';
+          }
+        } else {
+          if (token.modifier == '+' || token.modifier == '*') {
+            route += '((?:${token.pattern})${token.modifier})';
+          } else {
+            route += '(${token.pattern})${token.modifier}';
+          }
+        }
+      } else {
+        route += '(?:$prefix$suffix)${token.modifier}';
+      }
+    }
 
-            segmentBuffer.write(callIf<String>(
-                endsWith?.isEmpty ?? true, () => r'$', () => resolvedEndsWith));
+    if (end) {
+      if (!strict) {
+        route += '$delimiterRe?';
+      }
 
-            return segmentBuffer.toString();
-          },
-          () {
-            final StringBuffer segmentBuffer = StringBuffer(
-                strict ? '(?:$delimiter(?=$resolvedEndsWith))?' : '');
-            final PrexpToken lastToken = tokens.last;
-            if (lastToken is StringPrexpToken &&
-                delimiter
-                    .contains(lastToken.value[lastToken.value.length - 1])) {
-              segmentBuffer.write('(?=$delimiter|$resolvedEndsWith)');
-            }
+      route += endsWith.isEmpty ? r"$" : '(?=$endsWithRe)';
+    } else {
+      final PrexpToken endToken = tokens.last;
+      final bool isEndDelimited = endToken is StringPrexpToken
+          ? delimiterRe.contains(endToken.value.substring(-1))
+          : false;
 
-            return segmentBuffer.toString();
-          },
-        ),
-      ]);
+      if (!strict) {
+        route += '(?:$delimiterRe(?=$endsWithRe))?';
+      }
+      if (!isEndDelimited) {
+        route += '(?=$delimiterRe|$endsWithRe)';
+      }
     }
 
     return _PrexpFromTokensImpl._internal(
-      RegExp(buffer.toString(), caseSensitive: caseSensitive),
-      metadataContainer,
-    );
-  }
-
-  static T callIf<T>(
-      bool expression, T Function() handler, T Function() elseHandler) {
-    if (expression) {
-      return handler();
-    }
-
-    return elseHandler();
+        RegExp(route, caseSensitive: caseSensitive), metadata);
   }
 }
 
@@ -256,17 +230,11 @@ class _PrexpFromTokensImpl extends _PrexpImpl {
 class _PrexpFromRegExpImpl extends _PrexpImpl {
   _PrexpFromRegExpImpl._internal(super.original, super.metadata);
 
-  factory _PrexpFromRegExpImpl(RegExp regexp,
-      [Iterable<MetadataPrexpToken>? metadata]) {
-    if (metadata == null) {
-      return _PrexpFromRegExpImpl._internal(
-          regexp, regexp is Prexp ? regexp.metadata : []);
-    }
-
+  factory _PrexpFromRegExpImpl(RegExp regexp) {
     int index = 0;
     final Iterable<RegExpMatch> matches =
         groupRegExp.allMatches(regexp.pattern);
-    final List<MetadataPrexpToken> metadataStore = metadata.toList();
+    final List<MetadataPrexpToken> metadata = [];
 
     for (final RegExpMatch match in matches) {
       final MetadataPrexpToken token = MetadataPrexpToken(
@@ -276,10 +244,10 @@ class _PrexpFromRegExpImpl extends _PrexpImpl {
         modifier: '',
         pattern: '',
       );
-      metadataStore.add(token);
+      metadata.add(token);
     }
 
-    return _PrexpFromRegExpImpl._internal(regexp, metadataStore);
+    return _PrexpFromRegExpImpl._internal(regexp, metadata);
   }
 
   static final RegExp groupRegExp = RegExp(r'\((?:\?<(.*?)>)?(?!\?)');
@@ -291,21 +259,19 @@ class _PrexpFromStringImpl extends _PrexpImpl {
 
   factory _PrexpFromStringImpl(
     String path, {
-    Iterable<MetadataPrexpToken>? metadata,
     bool caseSensitive = defatulCaseSensitive,
     bool strict = defaultStrict,
     bool end = defaultEnd,
     bool start = defaultStart,
     String delimiter = defautlDelimiter,
     String prefixes = defaultPrefixes,
-    String? endsWith,
+    String endsWith = '',
     SegmentEncoder? encoder,
   }) {
     final Iterable<PrexpToken> tokens =
         Prexp.parse(path, prefixes: prefixes, delimiter: delimiter);
     final Prexp prexp = Prexp.fromTokens(
       tokens,
-      metadata: metadata,
       caseSensitive: caseSensitive,
       strict: strict,
       start: start,

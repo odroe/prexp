@@ -36,8 +36,7 @@ List<LexToken> lexer(String input) {
 
     // Modifier
     if ([r'*', r'+', r'?'].contains(char)) {
-      tokens.add(LexToken(LexType.modifier, index, char));
-      index++;
+      tokens.add(LexToken(LexType.modifier, index, input[index++]));
       continue;
 
       // Escape
@@ -47,25 +46,22 @@ List<LexToken> lexer(String input) {
 
       // Open
     } else if (char == r'{') {
-      tokens.add(LexToken(LexType.open, index, char));
-      index++;
+      tokens.add(LexToken(LexType.open, index, input[index++]));
       continue;
 
       // Close
     } else if (char == r'}') {
-      tokens.add(LexToken(LexType.close, index, char));
-      index++;
+      tokens.add(LexToken(LexType.close, index, input[index++]));
       continue;
     }
 
     // Name
     if (char == r':') {
       String name = '';
-      index++;
+      int j = index + 1;
 
-      while (index < input.length) {
-        final String char = input[index];
-        final int code = input.codeUnitAt(index);
+      while (j < input.length) {
+        final int code = input.codeUnitAt(j);
 
         if (
             // _
@@ -76,8 +72,7 @@ List<LexToken> lexer(String input) {
                 (code >= 65 && code <= 90) ||
                 // 0-9
                 (code >= 48 && code <= 57)) {
-          name += char;
-          index++;
+          name += input[j++];
           continue;
         }
 
@@ -89,6 +84,7 @@ List<LexToken> lexer(String input) {
       }
 
       tokens.add(LexToken(LexType.name, index, name));
+      index = j;
       continue;
     }
 
@@ -131,10 +127,11 @@ List<LexToken> lexer(String input) {
       }
 
       tokens.add(LexToken(LexType.pattern, index, pattern));
+      continue;
     }
 
     // Char
-    tokens.add(LexToken(LexType.char, index++, char));
+    tokens.add(LexToken(LexType.char, index, input[index++]));
   }
 
   return tokens..add(LexToken(LexType.end, input.length, ''));

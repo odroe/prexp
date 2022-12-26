@@ -10,7 +10,7 @@ class StringPrexpToken implements PrexpToken {
   StringPrexpToken(this.value);
 
   @override
-  String toString() => 'StringPrexpToken($value)';
+  String toString() => 'StringPrexpToken("$value")';
 }
 
 /// Metedata token.

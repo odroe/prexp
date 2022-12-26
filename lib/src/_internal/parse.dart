@@ -41,9 +41,14 @@ Iterable<PrexpToken> parse(
   String consumeText() {
     String result = '';
     String? value;
-    while ((value = (tryConsume(LexType.char) ?? tryConsume(LexType.escape))) !=
-        null) {
-      result += value!;
+    while (true) {
+      value = tryConsume(LexType.char);
+      value ??= tryConsume(LexType.escape);
+
+      if (value != null) {
+        result += value;
+        break;
+      }
     }
 
     return result;
@@ -54,7 +59,7 @@ Iterable<PrexpToken> parse(
     final String? name = tryConsume(LexType.name);
     final String? pattern = tryConsume(LexType.pattern);
 
-    if (name?.isNotEmpty ?? pattern?.isNotEmpty ?? false) {
+    if (name?.isNotEmpty == true || pattern?.isNotEmpty == true) {
       String prefix = char ?? '';
 
       if (!prefixes.contains(prefix)) {
@@ -108,7 +113,6 @@ Iterable<PrexpToken> parse(
         pattern: name.isNotEmpty && pattern.isEmpty ? defaultPattern : pattern,
         modifier: tryConsume(LexType.modifier) ?? '',
       ));
-      continue;
     }
 
     mustConsume(LexType.end);
