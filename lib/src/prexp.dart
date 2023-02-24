@@ -1,8 +1,6 @@
-import 'package:prexp/src/_internal/utils.dart';
-
 import '_internal/constants.dart';
 import '_internal/parse.dart' as parser;
-import 'token.dart';
+import 'prexp_token.dart';
 
 typedef SegmentEncoder = String Function(String segment);
 
@@ -165,18 +163,18 @@ class _PrexpFromTokensImpl extends _PrexpImpl {
     String route = start ? '^' : '';
 
     final List<MetadataPrexpToken> metadata = [];
-    final String endsWithRe = '[${escapeRegExp(endsWith)}]|\$';
-    final String delimiterRe = '[${escapeRegExp(delimiter)}]';
+    final String endsWithRe = '[${RegExp.escape(endsWith)}]|\$';
+    final String delimiterRe = '[${RegExp.escape(delimiter)}]';
 
     for (final PrexpToken token in tokens) {
       if (token is StringPrexpToken) {
-        route += escapeRegExp(encoder(token.value));
+        route += RegExp.escape(encoder(token.value));
         continue;
       }
 
       token as MetadataPrexpToken;
-      final String prefix = escapeRegExp(encoder(token.prefix));
-      final String suffix = escapeRegExp(encoder(token.suffix));
+      final String prefix = RegExp.escape(encoder(token.prefix));
+      final String suffix = RegExp.escape(encoder(token.suffix));
 
       if (token.pattern.isNotEmpty) {
         metadata.add(token);

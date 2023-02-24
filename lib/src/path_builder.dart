@@ -1,7 +1,7 @@
 import '_internal/constants.dart';
 import '_internal/utils.dart';
 import '_internal/parse.dart';
-import 'token.dart';
+import 'prexp_token.dart';
 import 'types.dart';
 
 /// Path builder.

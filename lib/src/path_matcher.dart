@@ -1,6 +1,6 @@
 import '_internal/utils.dart';
 import 'prexp.dart';
-import 'token.dart';
+import 'prexp_token.dart';
 import 'types.dart';
 
 /// Path matching result.

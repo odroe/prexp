@@ -7,7 +7,7 @@ void main() {
   print(prexp.hasMatch('/users/odroe')); // true
 
   final PathMatcher matcher = PathMatcher.fromPrexp(prexp);
-  print(matcher('/users/odroe')); // (PrexpMatch(/users/Seven, {name: Seven}))
+  print(matcher('/users/odroe')); // (PrexpMatch(/users/odroe, {name: Seven}))
 
   final PathBuilder builder = PathBuilder.fromPath(route);
   print(builder({'name': 'odroe'})); // /users/odroe

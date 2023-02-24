@@ -9,5 +9,5 @@ library prexp;
 export 'src/path_builder.dart';
 export 'src/path_matcher.dart';
 export 'src/prexp.dart';
-export 'src/token.dart';
+export 'src/prexp_token.dart';
 export 'src/types.dart';

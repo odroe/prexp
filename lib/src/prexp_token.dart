@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 /// Prexp token
 abstract class PrexpToken {}
 
@@ -7,10 +5,10 @@ abstract class PrexpToken {}
 class StringPrexpToken implements PrexpToken {
   final String value;
 
-  StringPrexpToken(this.value);
+  const StringPrexpToken(this.value);
 
   @override
-  String toString() => 'StringPrexpToken("$value")';
+  String toString() => '$StringPrexpToken("$value")';
 }
 
 /// Metedata token.
@@ -30,11 +28,11 @@ class MetadataPrexpToken implements PrexpToken {
   });
 
   @override
-  String toString() => 'MetadataPrexpToken(${json.encode({
-            'name': name,
-            'prefix': prefix,
-            'suffix': suffix,
-            'pattern': pattern,
-            'modifier': modifier,
-          })})';
+  String toString() => '$MetadataPrexpToken(${{
+        'name': name,
+        'prefix': prefix,
+        'suffix': suffix,
+        'pattern': pattern,
+        'modifier': modifier,
+      }})';
 }

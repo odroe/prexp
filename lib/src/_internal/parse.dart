@@ -1,7 +1,6 @@
 import 'constants.dart';
 import 'lexer.dart';
-import 'utils.dart';
-import '../token.dart';
+import '../prexp_token.dart';
 
 /// Parses a string of Dart code and returns the AST.
 Iterable<PrexpToken> parse(
@@ -10,7 +9,7 @@ Iterable<PrexpToken> parse(
   String prefixes = defaultPrefixes,
 }) {
   final List<LexToken> lexicalTokens = lexer(input);
-  final String defaultPattern = '[^${escapeRegExp(delimiter)}]+?';
+  final String defaultPattern = '[^${RegExp.escape(delimiter)}]+?';
   final List<PrexpToken> tokens = <PrexpToken>[];
 
   int key = 0;
@@ -39,19 +38,16 @@ Iterable<PrexpToken> parse(
   }
 
   String consumeText() {
-    String result = '';
-    String? value;
+    final result = StringBuffer();
     while (true) {
-      value = tryConsume(LexType.char);
-      value ??= tryConsume(LexType.escape);
-
+      final value = tryConsume(LexType.char) ?? tryConsume(LexType.escape);
       if (value != null) {
-        result += value;
+        result.write(value);
         break;
       }
     }
 
-    return result;
+    return result.toString();
   }
 
   while (index < lexicalTokens.length) {
