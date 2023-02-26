@@ -1,3 +1,8 @@
+## 0.1.2
+
+* refactor: default segment parser
+* refactor: lexer
+
 ## 0.1.1
 
 - Repair Regex does not meet expectations

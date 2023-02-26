@@ -1,6 +1,6 @@
 name: prexp
 description: Convert the path string to a regular expression, such as `/users/:name` and the like.
-version: 0.1.1
+version: 0.1.2
 repository: https://github.com/odroe/prexp
 
 environment:
