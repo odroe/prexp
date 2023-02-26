@@ -1,5 +1,4 @@
 import '_internal/constants.dart';
-import '_internal/utils.dart';
 import '_internal/parse.dart';
 import 'prexp_token.dart';
 import 'types.dart';
@@ -48,7 +47,7 @@ class PathBuilder {
   PathBuilder.fromTokens(
     this.tokens, {
     this.caseSensitive = defatulCaseSensitive,
-    this.encoder = segmentParser,
+    this.encoder = defaultSegmentParser,
     this.validate = defaultValidate,
   }) : _regularExpressions = tokens.map((token) {
           if (token is MetadataPrexpToken) {
@@ -64,7 +63,7 @@ class PathBuilder {
   factory PathBuilder.fromPath(
     String path, {
     bool caseSensitive = defatulCaseSensitive,
-    SegmentParser encoder = segmentParser,
+    SegmentParser encoder = defaultSegmentParser,
     bool validate = defaultValidate,
     String delimiter = defautlDelimiter,
     String prefixes = defaultPrefixes,

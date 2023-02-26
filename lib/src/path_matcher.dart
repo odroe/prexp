@@ -1,4 +1,3 @@
-import '_internal/utils.dart';
 import 'prexp.dart';
 import 'prexp_token.dart';
 import 'types.dart';
@@ -31,13 +30,13 @@ class PathMatcher {
   const PathMatcher.fromRegExp(
     this.regexp,
     this.metadata, {
-    this.decoder = segmentParser,
+    this.decoder = defaultSegmentParser,
   });
 
   /// Create a new [PathMatcher] from a [Prexp].
   PathMatcher.fromPrexp(
     Prexp prexp, {
-    this.decoder = segmentParser,
+    this.decoder = defaultSegmentParser,
   })  : regexp = prexp,
         metadata = prexp.metadata;
 
